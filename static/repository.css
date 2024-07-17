@@ -1,0 +1,86 @@
+/* General styles for both user and admin pages */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #edecec;
+    overflow-y: auto;
+}
+
+header {
+    background-color: #1C5730;
+    color: #ffffff;
+    padding: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1090px;
+}
+
+.logo-text {
+    display: flex;
+    align-items: center;
+}
+
+.pho-logo {
+    width: 80px;
+    height: 80px;
+    margin-right: 10px;
+    margin-top: 6px;
+}
+
+.pho-label {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.pho-label h2 {
+    margin: 0;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.pho-label h4 {
+    font-weight: normal;
+    margin: 0;
+}
+
+.pho-label h2 a,
+.pho-label h4 a,
+.pho-link {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.pho-label h2 a:hover,
+.pho-label h4 a:hover,
+.pho-link:hover {
+    text-decoration: none;
+}
+
+.links {
+    display: flex;
+    gap: 20px; /* Adjust the space between links */
+    font-size: 15px;
+}
+
+.links a {
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease; /* Smooth transition for color change */
+}
+
+.links a:hover {
+    color: #81A263; /* Color change on hover */
+}
