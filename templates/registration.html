@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Provincial Laguna Registration</title>
+    <link rel="stylesheet" href="/static/registration.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script>
+        function validateForm() {
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirm_password").value;
+            if (password !== confirmPassword) {
+                document.getElementById("password_error").style.display = "block";
+                return false;
+            }
+            return true;
+        }
+    
+        // Function to show message box after registration
+        function showRegistrationMessage(event) {
+            event.preventDefault(); // Prevent default form submission
+            var messageBox = document.createElement('div');
+            messageBox.textContent = 'Account Registered! Please wait for the admin approval';
+            messageBox.classList.add('message-box');
+            document.body.appendChild(messageBox);
+    
+            setTimeout(function() {
+                messageBox.style.display = 'none';
+                window.location.href = '/login'; // Redirect to login page after timeout
+            }, 3000); // Adjust timeout as needed (milliseconds)
+        }
+    </script>    
+</head>
+<body>
+    <div class="main-content">
+        <div class="login-container">
+            <img src="{{ url_for('static', filename='img/PHO-logo.png') }}" alt="Provincial Health Office Logo" class="pho-logo">
+            <div class="pho-label-login">
+                <h2><a href="/">Provincial Health Office</a></h2>
+                <h4><a href="/">Santa Cruz Laguna</a></h4>
+            </div>
+            <main>
+                <h2>Register</h2>
+                <!-- Error message container -->
+                <div id="password_error" class="error-message" style="display:none;">Passwords do not match!</div>
+                <form action="/register" method="post" onsubmit="return validateForm()" id="registrationForm">
+                    <div class="form-group">
+                        <input type="text" id="fullname" name="fullname" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                    </div>
+                    <button type="submit" onclick="showRegistrationMessage(event)">Register</button>
+                </form>
+                <p>Already have an account? <a href="/login">Log in.</a></p>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

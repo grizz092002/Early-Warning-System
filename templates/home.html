@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provincial Health Office</title>
+    <link rel="stylesheet" href="/static/home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header>
+        <div class="container-header">
+            <div class="navigation">
+                <div class="logo-text" id="logo-container">
+                    <img src="{{ url_for('static', filename='img/PHO-logo.png') }}" alt="Provincial Health Office Logo" class="pho-logo">
+                    <div class="pho-label">
+                        <h2>Provincial Health Office</h2>
+                        <h4>Santa Cruz Laguna</h4>
+                    </div>
+                </div>
+                <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+                <div class="menu">
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="/login" class="login-button">Login</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="sidebar">
+        <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        <div class="sidebar-menu">
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+                <li><a href="/login" class="login-button">Login</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <main>
+        <div id="home" class="container">
+            <section class="introduction">
+                <h2>About Dengue Fever</h2>
+                <p>Dengue fever is a mosquito-borne viral infection that causes flu-like symptoms, including high fever, severe headache, pain behind the eyes, joint and muscle pain, nausea, vomiting, and rash. In severe cases, it can lead to dengue hemorrhagic fever, characterized by bleeding, low platelet count, and organ damage. Dengue is prevalent in tropical and subtropical regions, especially in urban and semi-urban areas with inadequate sanitation and standing water, which serve as breeding grounds for mosquitoes.</p>
+                <p>Dengue fever is a mosquito-borne viral infection that causes flu-like symptoms, including high fever, severe headache, pain behind the eyes, joint and muscle pain, nausea, vomiting, and rash. In severe cases, it can lead to dengue hemorrhagic fever, characterized by bleeding, low platelet count, and organ damage. Dengue is prevalent in tropical and subtropical regions, especially in urban and semi-urban areas with inadequate sanitation and standing water, which serve as breeding grounds for mosquitoes.</p>
+                <p>Dengue fever is a mosquito-borne viral infection that causes flu-like symptoms, including high fever, severe headache, pain behind the eyes, joint and muscle pain, nausea, vomiting, and rash. In severe cases, it can lead to dengue hemorrhagic fever, characterized by bleeding, low platelet count, and organ damage. Dengue is prevalent in tropical and subtropical regions, especially in urban and semi-urban areas with inadequate sanitation and standing water, which serve as breeding grounds for mosquitoes.</p>
+                <p>To prevent dengue fever, it's essential to eliminate mosquito breeding sites, use mosquito repellents, wear protective clothing, and use mosquito nets. There is currently no specific treatment for dengue fever, but supportive care can help manage symptoms and prevent complications.</p>
+            </section>
+        </div>
+
+        <div id="about" class="container">
+            <section>
+                <h2>About Us</h2>
+                <p>We are dedicated to providing information and resources on dengue prevention and control. Our mission is to educate the public and reduce the incidence of dengue fever.</p>
+            </section>
+        </div>
+
+        <div id="contact" class="container">
+            <section>
+                <h2>Contact Us</h2>
+                <p>For more information, please contact us at:</p>
+                <p>Email: info@pho.org</p>
+                <p>Phone: +123-456-7890</p>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container-footer">
+            <p>Provincial Health Office, Santa Cruz Laguna</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var menuToggle = document.querySelectorAll('.menu-toggle');
+            var sidebar = document.querySelector('.sidebar');
+            var sidebarMenu = document.querySelector('.sidebar-menu');
+
+            // Toggle sidebar visibility on menu icon click
+            menuToggle.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+            });
+
+            // Handle smooth scroll to top functionality
+            var scrollToTopBtn = document.getElementById('scrollToTopBtn');
+            var isScrolling = false;
+
+            window.addEventListener('scroll', function() {
+                if (!isScrolling && window.scrollY > 300) {
+                    scrollToTopBtn.style.display = 'block';
+                } else {
+                    scrollToTopBtn.style.display = 'none';
+                }
+            });
+
+            scrollToTopBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                if (!isScrolling) {
+                    isScrolling = true;
+                    var currentPosition = window.pageYOffset || document.documentElement.scrollTop;
+                    var scrollStep = currentPosition / 15;
+
+                    function scrollAnimation() {
+                        currentPosition -= scrollStep;
+                        if (currentPosition > 0) {
+                            window.scrollTo(0, currentPosition);
+                            requestAnimationFrame(scrollAnimation);
+                        } else {
+                            window.scrollTo(0, 0);
+                            isScrolling = false;
+                        }
+                    }
+
+                    scrollAnimation();
+                }
+            });
+
+            // Smooth scroll for menu links
+            document.querySelectorAll('.menu a').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var targetSection = this.getAttribute('href');
+                    if (targetSection.startsWith('#')) {
+                        var targetElement = document.querySelector(targetSection);
+                        if (targetElement) {
+                            var offsetTop = targetElement.offsetTop;
+                            window.scrollTo({
+                                top: offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }
+                    } else {
+                        window.location.href = targetSection;
+                    }
+                    document.querySelector('.menu').classList.remove('active');
+                });
+            });
+
+            // Reload page on logo click
+            document.getElementById('logo-container').addEventListener('click', function() {
+                location.reload();
+            });
+        });
+    </script>
+</body>
+<button id="scrollToTopBtn" class="scroll-to-top-btn" title="Go to top"><i class="fa-solid fa-arrow-up"></i></button>
+</html>

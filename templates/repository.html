@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='repository.css') }}">
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <div class="container-header">
+            <div class="logo-text">
+                <a href="/admin" class="pho-link">
+                    <img src="{{ url_for('static', filename='img/PHO-logo.png') }}" alt="Provincial Health Office Logo" class="pho-logo">
+                    <div class="pho-label">
+                        <h2><a href="/admin">Provincial Health Office</a></h2>
+                        <h4><a href="/admin">Santa Cruz Laguna</a></h4>
+                    </div>
+                </a>
+            </div>
+            <div class="links">
+                <a href="/approve_accounts" class="pho-link">Accounts</a>
+                <a href="/repository" class="pho-link">Repository</a>
+                <a href="{{ url_for('predict') }}" class="pho-link">Predict</a>
+            </div>
+        </div>
+    </header>
+
+    <h1>REPOSITORY</h1>
+</body>
+</html>
