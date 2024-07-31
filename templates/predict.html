@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='predict.css') }}">
-    <title>Document</title>
+    <title>Predict Dengue Outbreak</title>
 </head>
 <body>
     <header>
@@ -22,10 +22,44 @@
                 <a href="/approve_accounts" class="pho-link">Accounts</a>
                 <a href="/repository" class="pho-link">Repository</a>
                 <a href="{{ url_for('predict') }}" class="pho-link">Predict</a>
+                <a href="/" class="logout-button">Logout</a>
             </div>
         </div>
     </header>
 
-    <h1>PREDICT</h1>
+    <h1>PREDICT DENGUE OUTBREAK</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
+        <label for="file1">Upload CSV file for temperature data:</label>
+        <input type="file" name="file1" id="file1" accept=".csv">
+        <br>
+        <label for="file2">Upload CSV file for dengue data:</label>
+        <input type="file" name="file2" id="file2" accept=".csv">
+        <br>
+        <label for="file3">Upload CSV file for humidity data:</label>
+        <input type="file" name="file3" id="file3" accept=".csv">
+        <br>
+        <label for="file4">Upload CSV file for mosquito data:</label>
+        <input type="file" name="file4" id="file4" accept=".csv">
+        <br>
+        <input type="submit" value="Upload and Predict">
+    </form>
+
+    <div class="table-container">
+        {% for table in tables %}
+            {{ table|safe }}
+        {% endfor %}
+    </div>
+    
 </body>
 </html>
