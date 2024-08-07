@@ -8,6 +8,7 @@ import sklearn
 import pickle
 import plotly.graph_objects as go
 import plotly.io as pio
+from sklearn.svm import SVC
 from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify, flash
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -16,7 +17,6 @@ from werkzeug.utils import secure_filename
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import f1_score, precision_score, accuracy_score, recall_score
 from sklearn.impute import SimpleImputer
@@ -73,17 +73,32 @@ with open(model_path, 'rb') as file:
 def predict():
     if request.method == 'POST':
         # Process uploaded files
-        files = ['file1', 'file2', 'file3', 'file4']
+        files = {
+            'file1': 'temperature',
+            'file2': 'dengue',
+            'file3': 'humidity',
+            'file4': 'mosquito'
+        }
         dfs = {}
-        
-        for file_key in files:
+        expected_columns = {
+            'temperature': ['Date', 'Max', 'Min', 'Avg'],
+            'dengue': ['DateOfEntry', 'Muncity', 'Sex', 'Blood_Type', 'Place_Acquired', 'DRU', 'MuncityOfDRU', 'OnsetToAdmit', 'Barangay', 'Admitted', 'Type', 'ClinClass', 'CaseClassification', 'Outcome'],
+            'humidity': ['Date', 'Specific', 'Relative', 'Precipitation'],
+            'mosquito': ['Trap Date', 'Genus', 'Specific Epithet', 'Gender', 'Count']
+        }
+
+        for file_key, file_type in files.items():
             if file_key in request.files:
                 file = request.files[file_key]
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     file.save(file_path)
-                    dfs[file_key] = read_file(file_path)  # Use the updated read_file function
+                    df = read_file(file_path)
+                    if not all(col in df.columns for col in expected_columns[file_type]):
+                        flash(f'File "{filename}" is missing required columns for {file_type}.', 'error')
+                        return redirect(url_for('predict'))
+                    dfs[file_key] = df
 
         # Check if all required files are uploaded
         if len(dfs) != len(files):
@@ -161,7 +176,7 @@ def predict():
         if hasattr(model, 'predict'):
             try:
                 # Predict future cases
-                future_month = pd.date_range(start=merged_df['DateMonthYear'].max(), periods=2, freq='M')[1]
+                future_month = pd.date_range(start=merged_df['DateMonthYear'].max(), periods=2, freq='ME')[1]
                 future_dates_df = pd.DataFrame({'DateMonthYear': [future_month] * len(prediction_df)})
                 future_dates_df = future_dates_df.merge(prediction_df, left_index=True, right_index=True)
 
@@ -191,7 +206,7 @@ def predict():
         all_municipalities = dengue_df['Muncity'].unique()
         all_municipalities_df = pd.DataFrame({'Muncity': all_municipalities})
         municipality_predictions = all_municipalities_df.merge(municipality_predictions, on='Muncity', how='left')
-        municipality_predictions['Predicted_Cases'].fillna(0, inplace=True)
+        municipality_predictions['Predicted_Cases'] = municipality_predictions['Predicted_Cases'].fillna(0)
 
         # Create HTML table
         prediction_table = municipality_predictions.to_html(classes='data', header=True, index=False)
@@ -199,7 +214,6 @@ def predict():
         return render_template('predict.html', tables=[prediction_table])
 
     return render_template('predict.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
