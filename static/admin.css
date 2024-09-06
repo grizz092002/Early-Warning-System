@@ -6,86 +6,20 @@ body {
     box-sizing: border-box;
     background-color: #edecec;
     overflow-y: auto;
+
 }
 
-header {
-    background-color: #1C5730;
-    color: #ffffff;
-    padding: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.container-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 1090px;
-}
-
-.logo-text {
-    display: flex;
-    align-items: center;
-}
-
-.pho-logo {
-    width: 80px;
-    height: 80px;
-    margin-right: 10px;
-    margin-top: 6px;
-}
-
-.pho-label {
-    margin-left: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.pho-label h2 {
-    margin: 0;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.pho-label h4 {
-    font-weight: normal;
-    margin: 0;
-}
-
-.pho-label h2 a,
-.pho-label h4 a,
-.pho-link {
-    color: #ffffff;
-    text-decoration: none;
-}
-
-.pho-label h2 a:hover,
-.pho-label h4 a:hover,
-.pho-link:hover {
-    text-decoration: none;
-}
-
-.links {
-    display: flex;
-    gap: 20px; /* Adjust the space between links */
-    font-size: 15px;
-}
-
-.links a {
-    color: #ffffff;
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.3s ease; /* Smooth transition for color change */
-}
-
-.links a:hover {
-    color: #81A263; /* Color change on hover */
+.main-content {
+    margin-top: 70px; /* Adjust this to match the header height */
 }
 
 .plot-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#plot-container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
@@ -132,54 +66,12 @@ header {
     flex-direction: column;
 }
 
-/* CSS for plot sections and year-select */
 .plot-section {
     margin-bottom: 40px;
     overflow: hidden;
     clear: both;
 }
 
-#year-select {
-    width: 150px;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    float: right;
-    margin-top: -40px;
-}
-
-#year-select::after {
-    content: '\25BC';
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-#year-select:hover {
-    border-color: #888;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-#year-select:focus {
-    border-color: #0056b3;
-    box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
-}
-
-#year-select option[disabled] {
-    color: #aaa;
-}
-
-/* General style for the select box */
 #municipality-select {
     width: 200px;
     padding: 10px;
@@ -195,7 +87,6 @@ header {
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-/* Style for the dropdown arrow */
 #municipality-select::after {
     content: '\25BC';
     position: absolute;
