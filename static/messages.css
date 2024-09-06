@@ -1,0 +1,13 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #edecec;
+    overflow-y: auto;
+    padding-top: 70px; /* Add padding to body to prevent content from hiding behind the fixed header */
+}
+
+.main-content {
+    margin-top: 70px; /* Adjust this to match the header height */
+}
