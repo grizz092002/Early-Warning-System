@@ -4,62 +4,292 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='predict.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='header.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <title>Predict Dengue Outbreak</title>
 </head>
+{% include 'header.html' %}
 <body>
-    <header>
-        <div class="container-header">
-            <div class="logo-text">
-                <a href="/admin" class="pho-link">
-                    <img src="{{ url_for('static', filename='img/PHO-logo.png') }}" alt="Provincial Health Office Logo" class="pho-logo">
-                    <div class="pho-label">
-                        <h2><a href="/admin">Provincial Health Office</a></h2>
-                        <h4><a href="/admin">Santa Cruz Laguna</a></h4>
+    <div class="main-content">
+        <h1>PREDICT DENGUE OUTBREAK AND SEND SMS ALERT</h1>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="info-form-container">
+            <div class="municipalities-container">
+                <h2>Municipalities and Contact Numbers</h2>
+                <p>
+                    After performing a prediction, you can automatically or manually send an SMS alert to the contact numbers below. 
+                    If there are changes in the contact numbers, you can update them here. Ensure the numbers are current for effective notifications.
+                </p>
+                <button id="update-btn" class="btn">Update</button>
+                <button id="save-btn" class="btn" disabled>Save</button>
+                <div class="municipalities-grid">
+                    <div class="municipality-entry">
+                        <label for="contact-famy">Famy</label>
+                        <input type="text" id="contact-famy" name="contact-famy" placeholder="Enter contact number" disabled>
                     </div>
-                </a>
+                    <div class="municipality-entry">
+                        <label for="contact-kalayaan">Kalayaan</label>
+                        <input type="text" id="contact-kalayaan" name="contact-kalayaan" placeholder="Enter contact number" disabled>
+                    </div>
+                    <div class="municipality-entry">
+                        <label for="contact-mabitac">Mabitac</label>
+                        <input type="text" id="contact-mabitac" name="contact-mabitac" placeholder="Enter contact number" disabled>
+                    </div>
+                    <div class="municipality-entry">
+                        <label for="contact-paete">Paete</label>
+                        <input type="text" id="contact-paete" name="contact-paete" placeholder="Enter contact number" disabled>
+                    </div>
+                    <div class="municipality-entry">
+                        <label for="contact-pakil">Pakil</label>
+                        <input type="text" id="contact-pakil" name="contact-pakil" placeholder="Enter contact number" disabled>
+                    </div>
+                    <div class="municipality-entry">
+                        <label for="contact-pangil">Pangil</label>
+                        <input type="text" id="contact-pangil" name="contact-pangil" placeholder="Enter contact number" disabled>
+                    </div>
+                    <div class="municipality-entry">
+                        <label for="contact-santa-maria">Santa Maria</label>
+                        <input type="text" id="contact-santa-maria" name="contact-santa-maria" placeholder="Enter contact number" disabled>
+                    </div>
+                    <div class="municipality-entry">
+                        <label for="contact-siniloan">Siniloan</label>
+                        <input type="text" id="contact-siniloan" name="contact-siniloan" placeholder="Enter contact number" disabled>
+                    </div>
+                </div>
             </div>
-            <div class="links">
-                <a href="/approve_accounts" class="pho-link">Accounts</a>
-                <a href="/repository" class="pho-link">Repository</a>
-                <a href="{{ url_for('predict') }}" class="pho-link">Predict</a>
-                <a href="/" class="logout-button">Logout</a>
+
+            <div class="info-container">
+                <h2>Data Requirements for Prediction</h2>
+                <p>Please ensure that your files meet the following requirements:</p>
+                <ul>
+                    <li>Accepted formats: CSV or Excel files only.</li>
+                    <li>Temperature Dataset: Should include columns <strong>'Max'</strong> (mean), <strong>'Min'</strong> (mean), <strong>'Avg'</strong>, and <strong>Date</strong> (in dd/mm/yyyy format).</li>
+                    <li>Humidity Dataset: Should include columns <strong>'Specific'</strong> (mean), <strong>'Relative'</strong>, and <strong>Date</strong> (in dd/mm/yyyy format).</li>
+                    <li>Mosquito Dataset: Should include columns <strong>Genus</strong>, <strong>Specific Epithet</strong>, <strong>Gender</strong>, <strong>Count</strong>, and <strong>Date</strong> (in dd/mm/yyyy format).</li>
+                    <li>Dengue Cases Dataset: Should include columns <strong>'Muncity'</strong>, <strong>Sex</strong>, <strong>Age</strong>, <strong>Place_Acquired</strong>, <strong>ClinClass</strong>, <strong>CaseClassification</strong>,
+                        <strong>Type</strong>, <strong>LabRes</strong>, <strong>MorbidityMonth</strong>, <strong>Aadmitted</strong>, <strong>MorbidityWeek</strong>,
+                         <strong>'Blood_Type'</strong>, <strong>'MuncityOfDRU'</strong>, <strong>'Barangay'</strong>, <strong>'ClinClass'</strong>, <strong>'CaseClassification'</strong>, and <strong>'Place_Acquired'</strong>.</li>
+                    <li>All dates should be in the format <strong>dd/mm/yyyy</strong>.</li>
+                </ul>
+            </div>
+
+            <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
+                <div class="file-upload-container">
+                    <input type="file" name="file1" id="file1" accept=".csv, .xlsx">
+                    <label for="file1" class="file-upload-button">Upload Temperature Data</label>
+                </div>
+                <div class="file-upload-container">
+                    <input type="file" name="file2" id="file2" accept=".csv, .xlsx">
+                    <label for="file2" class="file-upload-button">Upload Dengue Data</label>
+                </div>
+                <div class="file-upload-container">
+                    <input type="file" name="file3" id="file3" accept=".csv, .xlsx">
+                    <label for="file3" class="file-upload-button">Upload Humidity Data</label>
+                </div>
+                <div class="file-upload-container">
+                    <input type="file" name="file4" id="file4" accept=".csv, .xlsx">
+                    <label for="file4" class="file-upload-button">Upload Mosquito Data</label>
+                </div>
+                <br>
+                <input type="submit" value="Upload and Predict">
+            </form>
+        </div>
+
+        <div class="container">
+            <h1>Dengue Prediction Results</h1>
+            <p class="sms-description">
+                Select the municipalities from the table below to send SMS alerts with the predicted dengue cases to the respective contact numbers. 
+                The alert will be sent to the contact number associated with each selected municipality once the "Send Alert" button is clicked.
+            </p>
+            <div class="table-filter">
+                <input type="text" id="search" placeholder="Search...">
+            </div>
+        
+            <div class="table-container">
+                <table id="results">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Month</th>
+                            <th>Municipality</th>
+                            <th>Predicted Cases</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in predictions %}
+                        <tr>
+                            <td><input type="checkbox" class="select-row" data-muncity="{{ record['Muncity'] }}"></td>
+                            <td>{{ record['DateMonthYear'].strftime('%b %Y') }}</td>
+                            <td>{{ record['Muncity'] }}</td>
+                            <td>{{ record['Predicted_Cases'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Send Alert Button -->
+            <div class="send-alert-container">
+                <button id="send-alert-btn" class="btn" disabled>Send Alert</button>
             </div>
         </div>
-    </header>
-
-    <h1>PREDICT DENGUE OUTBREAK</h1>
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
-    <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
-        <label for="file1">Upload CSV file for temperature data:</label>
-        <input type="file" name="file1" id="file1" accept=".csv">
-        <br>
-        <label for="file2">Upload CSV file for dengue data:</label>
-        <input type="file" name="file2" id="file2" accept=".csv">
-        <br>
-        <label for="file3">Upload CSV file for humidity data:</label>
-        <input type="file" name="file3" id="file3" accept=".csv">
-        <br>
-        <label for="file4">Upload CSV file for mosquito data:</label>
-        <input type="file" name="file4" id="file4" accept=".csv">
-        <br>
-        <input type="submit" value="Upload and Predict">
-    </form>
-
-    <div class="table-container">
-        {% for table in tables %}
-            {{ table|safe }}
-        {% endfor %}
     </div>
-    
+
+    <script>
+        fetch('/contact_numbers')
+            .then(response => response.json())
+            .then(data => {
+                // Assuming 'data' is an object with municipality names as keys and contact numbers as values
+                Object.keys(data).forEach(municipality => {
+                    const input = document.getElementById(`contact-${municipality.toLowerCase()}`);
+                    if (input) {
+                        input.value = data[municipality];
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching contact numbers:', error);
+            });
+
+            document.getElementById('save-btn').addEventListener('click', () => {
+            const contactNumbers = {
+                'famy': document.getElementById('contact-famy').value,
+                'kalayaan': document.getElementById('contact-kalayaan').value,
+                'mabitac': document.getElementById('contact-mabitac').value,
+                'paete': document.getElementById('contact-paete').value,
+                'pakil': document.getElementById('contact-pakil').value,
+                'pangil': document.getElementById('contact-pangil').value,
+                'santa-maria': document.getElementById('contact-santa-maria').value,
+                'siniloan': document.getElementById('contact-siniloan').value,
+            };
+
+            fetch('/update-contact-numbers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(contactNumbers)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Contact numbers updated successfully');
+                    document.getElementById('save-btn').disabled = true;
+                } else {
+                    alert('Failed to update contact numbers');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('search').addEventListener('keyup', function() {
+            var query = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#results tbody tr');
+
+            rows.forEach(function(row) {
+                var cells = row.getElementsByTagName('td');
+                var rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+                
+                if (rowText.indexOf(query) > -1) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+
+        document.querySelectorAll('.file-upload-container input').forEach(input => {
+            input.addEventListener('change', function() {
+                const label = this.nextElementSibling;
+                label.textContent = this.files.length > 0 ? this.files[0].name : 'Upload Data';
+            });
+        });
+
+        document.getElementById('update-btn').addEventListener('click', function() {
+            // Enable all textboxes
+            const inputs = document.querySelectorAll('input[type="text"]');
+            inputs.forEach(input => input.disabled = false);
+
+            // Enable Save button
+            document.getElementById('save-btn').disabled = false;
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendAlertBtn = document.getElementById('send-alert-btn');
+            const checkboxes = document.querySelectorAll('.select-row');
+            const rows = document.querySelectorAll('#results tbody tr');
+
+            // Add hover effect and row selection
+            rows.forEach((row, index) => {
+                const checkbox = row.querySelector('.select-row');
+
+                // Toggle selected class on row click
+                row.addEventListener('click', function() {
+                    checkbox.checked = !checkbox.checked;
+                    row.classList.toggle('selected', checkbox.checked);
+                    toggleSendAlertButton();
+                });
+
+                // Also handle checkbox changes manually (for direct checkbox clicks)
+                checkbox.addEventListener('change', function() {
+                    row.classList.toggle('selected', checkbox.checked);
+                    toggleSendAlertButton();
+                });
+            });
+
+            // Enable the send alert button if any row is selected
+            function toggleSendAlertButton() {
+                const selectedRows = Array.from(checkboxes).some(cb => cb.checked);
+                sendAlertBtn.disabled = !selectedRows;
+            }
+
+            // Send SMS alerts to selected municipalities
+            sendAlertBtn.addEventListener('click', function() {
+                const selectedMunicipalities = Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.dataset.muncity);
+
+                const contactNumbers = selectedMunicipalities.reduce((acc, muncity) => {
+                    acc[muncity] = document.getElementById(`contact-${muncity.toLowerCase()}`).value;
+                    return acc;
+                }, {});
+
+                fetch('/send-alerts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactNumbers)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Alerts sent successfully');
+                        sendAlertBtn.disabled = true; // Disable button after sending
+                    } else {
+                        alert('Failed to send alerts');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+
+
+
+    </script>
 </body>
 </html>
