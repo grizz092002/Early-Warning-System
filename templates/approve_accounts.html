@@ -3,78 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approve Account</title>
+    <title>Approve Accounts</title>
     <link rel="stylesheet" href="/static/approve_accounts.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='header.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<header>
-    <div class="container-header">
-        <div class="logo-text">
-            <a href="/admin" class="pho-link">
-                <img src="{{ url_for('static', filename='img/PHO-logo.png') }}" alt="Provincial Health Office Logo" class="pho-logo">
-                <div class="pho-label">
-                    <h2><a href="/admin">Provincial Health Office</a></h2>
-                    <h4><a href="/admin">Santa Cruz Laguna</a></h4>
-                </div>
-            </a>
-        </div>
-        <div class="links">
-            <a href="/approve_accounts" class="pho-link">Accounts</a>
-            <a href="/repository" class="pho-link">Repository</a>
-            <a href="/predict" class="pho-link">Predict</a>
-        </div>
-    </div>
-</header>
+{% include 'header.html' %}
 
 <body>
-    <div class="center-container">
-        <h1>Approve Accounts</h1>
-        <input type="text" id="searchBar" placeholder="Search for names..">
-        <div class="scrollable-table">
-            <table id="userTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Fullname</th>
-                        <th>Email</th>
-                        <th>Password</th>
-                        <th>Status</th> <!-- New column for status -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Table data will be inserted here dynamically -->
-                </tbody>
-            </table>
+    <div class="main-content">
+        <div class="center-container">
+            <h1>Approve Accounts</h1>
+            <input type="text" id="searchBar" placeholder="Search for names..">
+            <div class="scrollable-table">
+                <table id="userTable">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Fullname</th>
+                            <th>Municipality</th>
+                            <th>Contact Number</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table data will be inserted here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="buttons">
+                <button class="approve-btn" id="approveBtn">Approve</button>
+                <button class="reject-btn" id="rejectBtn">Reject</button>
+            </div>
+            <div class="message-box" id="messageBox"></div>
         </div>
-        <div class="buttons">
-            <button class="approve-btn" id="approveBtn">Approve</button>
-            <button class="reject-btn" id="rejectBtn">Reject</button>
-        </div>
-        <div class="message-box" id="messageBox"></div>
     </div>
 
     <script>
-        function updateButtonStates(selectedRow) {
-            var statusCell = selectedRow.cells[4]; // Assuming status column is at index 4
-            var status = statusCell.textContent.trim().toLowerCase();
-
-            // Disable buttons based on status
-            if (status === 'approved' || status === 'rejected') {
-                document.getElementById('approveBtn').disabled = true;
-                document.getElementById('rejectBtn').disabled = true;
-            } else {
-                document.getElementById('approveBtn').disabled = false;
-                document.getElementById('rejectBtn').disabled = false;
-            }
-        }
-
         document.getElementById('searchBar').addEventListener('keyup', function() {
             var searchTerm = this.value.trim().toLowerCase();
             var rows = document.querySelectorAll('#userTable tbody tr');
 
             rows.forEach(function(row) {
+                var email = row.cells[0].textContent.trim().toLowerCase();
                 var fullname = row.cells[1].textContent.trim().toLowerCase();
-                var email = row.cells[2].textContent.trim().toLowerCase();
-                var status = row.cells[4].textContent.trim().toLowerCase(); // Index 4 for Status column
+                var municipality = row.cells[2].textContent.trim().toLowerCase();
+                var contact_number = row.cells[3].textContent.trim().toLowerCase();
+                var status = row.cells[4].textContent.trim().toLowerCase();
+                
 
                 if (fullname.includes(searchTerm) || email.includes(searchTerm) || status.includes(searchTerm)) {
                     row.style.display = '';
@@ -84,107 +60,138 @@
             });
         });
 
-
-        fetch('/api/users')
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/users')
             .then(response => response.json())
             .then(data => {
-                var tbody = document.querySelector('#userTable tbody');
-                data.forEach(function(user) {
-                    var row = document.createElement('tr');
-                    var maskedPassword = '*'.repeat(user.password.length);
-                    row.innerHTML = `<td>${user.id}</td><td>${user.fullname}</td><td>${user.email}</td><td>${maskedPassword}</td><td>${user.status}</td>`;
-                    row.dataset.userId = user.id;
-                    row.dataset.fullname = user.fullname;
-                    row.dataset.email = user.email;
-                    row.dataset.password = user.password;
-                    tbody.appendChild(row);
+                console.log(data); // Log the data to check its structure
+                const tbody = document.querySelector('#userTable tbody');
+                tbody.innerHTML = ''; // Clear existing rows
 
-                    // Check and disable buttons based on initial status
-                    if (user.status === 'approved' || user.status === 'rejected') {
-                        document.getElementById('approveBtn').disabled = true;
-                        document.getElementById('rejectBtn').disabled = true;
+                data.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.email}</td>
+                        <td>${user.fullname}</td>
+                        <td>${user.municipality}</td>
+                        <td>${user.contact_number}</td>
+                        <td>${user.status}</td>`;
+                    row.dataset.email = user.email;
+
+                    if (user.status === 'approved') {
+                        row.classList.add('approved');
+                    } else if (user.status === 'rejected') {
+                        row.classList.add('rejected');
                     }
+
+                    tbody.appendChild(row);
                 });
             })
             .catch(error => console.error('Error fetching user data:', error));
 
-        document.getElementById('approveBtn').addEventListener('click', function() {
-            var selectedRow = document.querySelector('#userTable tbody tr.selected');
-            if (selectedRow) {
-                var userId = selectedRow.dataset.userId;
-                var fullname = selectedRow.dataset.fullname;
-                var email = selectedRow.dataset.email;
-                var password = selectedRow.dataset.password;
+            document.getElementById('approveBtn').addEventListener('click', function() {
+                const selectedRow = document.querySelector('#userTable tbody tr.selected');
+                if (selectedRow) {
+                    const email = selectedRow.dataset.email;
+                    const fullname = selectedRow.cells[1].textContent;
 
-                fetch('/api/approve_user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ userId: userId, fullname: fullname, email: email, password: password })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        showMessageBox('Account Approved');
-                        selectedRow.cells[4].textContent = 'approved'; // Update status in the table
-                        selectedRow.classList.add('approved');
-                        selectedRow.classList.remove('selected');
-                        updateButtonStates(selectedRow); // Update button states after approval
-                    } else {
-                        showMessageBox('Error: ' + data.error);
+                    if (!email) {
+                        showMessageBox('Error: No user selected');
+                        return;
                     }
-                })
-                .catch(error => console.error('Error approving user:', error));
-            }
-        });
 
-        document.getElementById('rejectBtn').addEventListener('click', function() {
-            var selectedRow = document.querySelector('#userTable tbody tr.selected');
-            if (selectedRow) {
-                var userId = selectedRow.dataset.userId;
-
-                fetch('/api/reject_user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ userId: userId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        showMessageBox('Account Rejected');
-                        selectedRow.cells[4].textContent = 'rejected'; // Update status in the table
-                        selectedRow.classList.add('rejected');
-                        selectedRow.classList.remove('selected');
-                        updateButtonStates(selectedRow); // Update button states after rejection
-                    } else {
-                        showMessageBox('Error: ' + data.error);
-                    }
-                })
-                .catch(error => console.error('Error rejecting user:', error));
-            }
-        });
-
-        function showMessageBox(message) {
-            var messageBox = document.getElementById('messageBox');
-            messageBox.textContent = message;
-            messageBox.style.display = 'block';
-            setTimeout(function() {
-                messageBox.style.display = 'none';
-            }, 2000);
-        }
-
-        document.querySelector('#userTable tbody').addEventListener('click', function(event) {
-            var rows = document.querySelectorAll('#userTable tbody tr');
-            rows.forEach(function(row) {
-                row.classList.remove('selected');
+                    fetch('/api/approve_user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email: email, fullname: fullname })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            showMessageBox('Account Approved');
+                            selectedRow.cells[2].textContent = 'approved'; // Update status in the table
+                            selectedRow.classList.add('approved');
+                            selectedRow.classList.remove('selected');
+                            updateButtonStates(selectedRow); // Update button states after approval
+                        } else {
+                            showMessageBox('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error approving user:', error));
+                } else {
+                    showMessageBox('Error: No row selected');
+                }
             });
-            event.target.parentElement.classList.add('selected');
 
-            // Update button states based on selected row status
-            updateButtonStates(event.target.parentElement);
+            document.getElementById('rejectBtn').addEventListener('click', function() {
+                const selectedRow = document.querySelector('#userTable tbody tr.selected');
+                if (selectedRow) {
+                    const email = selectedRow.dataset.email;
+
+                    if (!email) {
+                        showMessageBox('Error: No user selected');
+                        return;
+                    }
+
+                    fetch('/api/reject_user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email: email })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            showMessageBox('Account Rejected');
+                            selectedRow.cells[2].textContent = 'rejected'; // Update status in the table
+                            selectedRow.classList.add('rejected');
+                            selectedRow.classList.remove('selected');
+                            updateButtonStates(selectedRow); // Update button states after rejection
+                        } else {
+                            showMessageBox('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error rejecting user:', error));
+                } else {
+                    showMessageBox('Error: No row selected');
+                }
+            });
+
+            document.querySelector('#userTable tbody').addEventListener('click', function(event) {
+                const rows = document.querySelectorAll('#userTable tbody tr');
+                rows.forEach(row => row.classList.remove('selected'));
+                const selectedRow = event.target.closest('tr');
+                if (selectedRow) {
+                    selectedRow.classList.add('selected');
+                    // Update button states based on selected row status
+                    updateButtonStates(selectedRow);
+                }
+            });
+
+            function updateButtonStates(selectedRow) {
+                const statusCell = selectedRow.cells[2]; // Index 2 for Status column
+                const status = statusCell.textContent.trim().toLowerCase();
+
+                if (status === 'approved' || status === 'rejected') {
+                    document.getElementById('approveBtn').disabled = true;
+                    document.getElementById('rejectBtn').disabled = true;
+                } else {
+                    document.getElementById('approveBtn').disabled = false;
+                    document.getElementById('rejectBtn').disabled = false;
+                }
+            }
+
+            function showMessageBox(message) {
+                const messageBox = document.getElementById('messageBox');
+                messageBox.textContent = message;
+                messageBox.style.display = 'block';
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 2000);
+            }
         });
     </script>
 </body>
