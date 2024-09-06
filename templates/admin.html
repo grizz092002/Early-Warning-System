@@ -6,90 +6,68 @@
     <title>Admin Page</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='header.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
-    <header>
-        <div class="container-header">
-            <div class="logo-text">
-                <a href="/admin" class="pho-link">
-                    <img src="{{ url_for('static', filename='img/PHO-logo.png') }}" alt="Provincial Health Office Logo" class="pho-logo">
-                    <div class="pho-label">
-                        <h2><a href="/admin">Provincial Health Office</a></h2>
-                        <h4><a href="/admin">Santa Cruz Laguna</a></h4>
+    {% include 'header.html' %}
+    <div class="main-content">
+        <div class="plot-container">
+            <div class="plot-section">
+                <h2>Total Distribution of Dengue Cases by Municipality</h2>
+                <div class="side-by-side-container">
+                    <div id="mapid" class="map-container"></div>
+                    <div id="municipality-plot" class="municipality-plot">
+                        {{ cases_per_municipality_html | safe }}
                     </div>
-                </a>
-            </div>
-            <div class="links">
-                <a href="/approve_accounts" class="pho-link">Accounts</a>
-                <a href="/repository" class="pho-link">Repository</a>
-                <a href="{{ url_for('predict') }}" class="pho-link">Predict</a>
-                <a href="/">Logout</a>
-            </div>
-        </div>
-    </header>
-    
-    <div class="plot-container">
-        <div class="plot-section">
-            <h2>Total Distribution of Dengue Cases by Municipality</h2>
-            <div class="side-by-side-container">
-                <div id="mapid" class="map-container"></div>
-                <div id="municipality-plot" class="municipality-plot">
-                    {{ cases_per_municipality_html | safe }}
                 </div>
             </div>
-        </div>
-        
-        <div class="plot-section">
-            <h2>Distribution of Dengue Cases by Barangay</h2>
-            <select id="municipality-select" onchange="updatePlot()">
-                <option value="" selected disabled>Select Municipality</option>
-                <option value="Famy">Famy</option>
-                <option value="Kalayaan">Kalayaan</option>
-                <option value="Mabitac">Mabitac</option>
-                <option value="Paete">Paete</option>
-                <option value="Pakil">Pakil</option>
-                <option value="Pangil">Pangil</option>
-                <option value="Santa Maria">Santa Maria</option>
-                <option value="Siniloan">Siniloan</option>
-            </select>
-            <div id="barangay-plots">
-                {% for municipality, plot_html in plots.items() %}
-                    <div id="{{ municipality }}" class="barangay-plot" style="display: none;">
-                        {{ plot_html | safe }}
-                    </div>
-                {% endfor %}
+            
+            <div class="plot-section">
+                <h2>Distribution of Dengue Cases by Barangay</h2>
+                <select id="municipality-select" onchange="updatePlot()">
+                    <option value="" selected disabled>Select Municipality</option>
+                    <option value="Famy">Famy</option>
+                    <option value="Kalayaan">Kalayaan</option>
+                    <option value="Mabitac">Mabitac</option>
+                    <option value="Paete">Paete</option>
+                    <option value="Pakil">Pakil</option>
+                    <option value="Pangil">Pangil</option>
+                    <option value="Santa Maria">Santa Maria</option>
+                    <option value="Siniloan">Siniloan</option>
+                </select>
+                <div id="barangay-plots">
+                    {% for municipality, plot_html in plots.items() %}
+                        <div id="{{ municipality }}" class="barangay-plot" style="display: none;">
+                            {{ plot_html | safe }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
-        
-        
-        <div class="plot-section">
-            <h2>Total Distribution of Dengue Cases by Month of Admission</h2>
-            <div id="month-distribution-plot">
-                {{ month_distribution_html | safe }}
+    
+            <div class="plot-section">
+                <h2>Total Distribution of Dengue Cases by Month of Admission</h2>
+                <div id="month-distribution-plot">
+                    {{ month_distribution_html | safe }}
+                </div>
             </div>
-        </div>
-        
-        <select id="year-select" >
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023">2023</option>
-        </select>
-
-        <div class="plot-section">
-            <h2>Total Distribution of Dengue Cases by Age and Gender</h2>
-            <div class="age-gender-plot">
-                {{ age_gender_html | safe }}
+    
+    
+            <div class="plot-section">
+                <h2>Total Distribution of Dengue Cases by Age and Gender</h2>
+                <div class="age-gender-plot">
+                    {{ age_gender_html | safe }}
+                </div>
             </div>
-        </div>
-
-        <div class="plot-section">
-            <h2>Total Distribution of Dengue Cases by Blood Type</h2>
-            <div class="blood-type-plot">
-                {{ blood_type_html | safe }}
+    
+            <div class="plot-section">
+                <h2>Total Distribution of Dengue Cases by Blood Type</h2>
+                <div class="blood-type-plot">
+                    {{ blood_type_html | safe }}
+                </div>
             </div>
         </div>
     </div>
@@ -117,9 +95,8 @@
         }
 
         window.onload = function() {
-            updatePlot();
-            initMap();
-            updateMonthlyAdmission();
+            updatePlot(); // Assuming you have this function for other purposes
+            initMap(); // Ensure initMap function is defined if needed
         };
 
         var map;
@@ -144,17 +121,46 @@
         }
 
         function createMarker(municipality, coordinates, cases) {
-            var marker = L.marker(coordinates).addTo(map);
-            marker.bindPopup("<b>" + municipality + "</b><br>Cases: " + cases);
-            marker.on('mouseover', function() {
-                marker.openPopup();
+            // Determine the radius of the circle based on the number of cases
+            var radius = Math.sqrt(cases) * 200; // Adjust multiplier to scale appropriately
+
+            // Determine the color of the circle based on the number of cases
+            var color;
+            if (cases >= 250) {
+                color = 'red';
+            } else if (cases >= 200) {
+                color = 'orange';
+            } else if (cases >= 150) {
+                color = 'yellow';
+            } else if (cases >= 100) {
+                color = 'green';
+            } else {
+                color = 'blue'; // Default color if cases are lower than 100
+            }
+
+            // Create a circle marker instead of a regular marker
+            var circleMarker = L.circle(coordinates, {
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.5,
+                radius: radius
+            }).addTo(map);
+
+            circleMarker.bindPopup("<b>" + municipality + "</b><br>Cases: " + cases);
+
+            // Add event listeners for highlighting and popup behavior
+            circleMarker.on('mouseover', function() {
+                circleMarker.openPopup();
                 highlightMunicipality(municipality);
             });
-            marker.on('mouseout', function() {
-                marker.closePopup();
+
+            circleMarker.on('mouseout', function() {
+                circleMarker.closePopup();
                 removeHighlight();
             });
         }
+
+
 
         function highlightMunicipality(municipality) {
             console.log("Highlighting municipality:", municipality);
@@ -228,6 +234,7 @@
 
             if (map.tap) map.tap.disable();
         }
+
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/3.1.0/leaflet.ajax.min.js"></script>
