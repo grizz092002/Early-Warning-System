@@ -4,28 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='repository.css') }}">
-    <title>Document</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='header.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Repository</title>
 </head>
+{% include 'header.html' %}
 <body>
-    <header>
-        <div class="container-header">
-            <div class="logo-text">
-                <a href="/admin" class="pho-link">
-                    <img src="{{ url_for('static', filename='img/PHO-logo.png') }}" alt="Provincial Health Office Logo" class="pho-logo">
-                    <div class="pho-label">
-                        <h2><a href="/admin">Provincial Health Office</a></h2>
-                        <h4><a href="/admin">Santa Cruz Laguna</a></h4>
-                    </div>
-                </a>
-            </div>
-            <div class="links">
-                <a href="/approve_accounts" class="pho-link">Accounts</a>
-                <a href="/repository" class="pho-link">Repository</a>
-                <a href="{{ url_for('predict') }}" class="pho-link">Predict</a>
-            </div>
-        </div>
-    </header>
 
-    <h1>REPOSITORY</h1>
+    <div class="main-content">
+        <main>
+            <h1>Repository</h1>
+            <div class="container">
+                <div class="folder-container">
+                    {% if folders %}
+                        {% for folder in folders %}
+                            <div class="folder">
+                                <h2 class="folder-name" onclick="toggleFolder('{{ folder.name }}')">{{ folder.name }}</h2>
+                                <div class="file-list" id="folder-{{ folder.name }}">
+                                    <ul>
+                                        {% for file in folder.files %}
+                                            <li><a href="{{ file.url }}" download>{{ file.name }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No folders found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleFolder(folderName) {
+            const folderElement = document.getElementById('folder-' + folderName);
+            if (folderElement.style.display === 'none' || folderElement.style.display === '') {
+                folderElement.style.display = 'block';
+            } else {
+                folderElement.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
