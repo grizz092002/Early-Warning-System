@@ -7,81 +7,8 @@ body {
     overflow-y: auto;
 }
 
-header {
-    background-color: #1C5730;
-    color: #ffffff;
-    padding: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.container-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 1090px;
-}
-
-.logo-text {
-    display: flex;
-    align-items: center;
-}
-
-.pho-logo {
-    width: 80px;
-    height: 80px;
-    margin-right: 10px;
-    margin-top: 6px;
-}
-
-.pho-label {
-    margin-left: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.pho-label h2 {
-    margin: 0;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.pho-label h4 {
-    font-weight: normal;
-    margin: 0;
-}
-
-.pho-label h2 a,
-.pho-label h4 a,
-.pho-link {
-    color: #ffffff;
-    text-decoration: none;
-}
-
-.pho-label h2 a:hover,
-.pho-label h4 a:hover,
-.pho-link:hover {
-    text-decoration: none;
-}
-
-.links {
-    display: flex;
-    gap: 20px; /* Adjust the space between links */
-    font-size: 15px;
-}
-
-.links a {
-    color: #ffffff;
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.3s ease; /* Smooth transition for color change */
-}
-
-.links a:hover {
-    color: #81A263; /* Color change on hover */
+.main-content {
+    margin-top: 70px; /* Adjust this to match the header height */
 }
 
 .center-container {
@@ -90,7 +17,7 @@ header {
     align-items: center;
     margin: 0 auto;
     width: 70%;
-    max-width: 800px;
+    max-width: 1100px;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -126,12 +53,25 @@ th, td {
 
 .scrollable-table {
     overflow-y: auto;
-    max-height: 400px; /* Adjust the height as needed */
+    max-height: 400px; 
     width: 100%;
 }
 
 tr.selected {
-    background-color: #d3d3d3; /* Light gray highlight */
+    background-color: #d3d3d3; 
+}
+
+table tbody tr:hover {
+    background-color: #f0f0f0; 
+    cursor: pointer; 
+}
+
+table tbody tr.selected {
+    background-color: #d3d3d3; 
+}
+
+table tbody tr.selected:hover {
+    background-color: #d3d3d3;
 }
 
 .buttons {
