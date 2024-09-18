@@ -4,8 +4,11 @@ import plotly.graph_objs as go
 import numpy as np
 
 def process_data(municipality=None):
-    data = pd.read_csv('C:/Users/Joseph Collantes/OneDrive/Desktop/THESIS/Dengue-Cases-Datasets-Synthetic.csv')
-    
+    try:
+        data = pd.read_csv('C:/Users/Joseph Collantes/OneDrive/Desktop/THESIS/Dengue-Cases.csv', encoding='utf-8')
+    except UnicodeDecodeError:
+        data = pd.read_csv('C:/Users/Joseph Collantes/OneDrive/Desktop/THESIS/Dengue-Cases.csv', encoding='ISO-8859-1')
+
     municipality_column = 'Muncity'
     data['Age'] = data['AgeYears'] + data['AgeMons'] / 12 + data['AgeDays'] / 365
     data['DAdmit'] = pd.to_datetime(data['DAdmit'], errors='coerce', dayfirst=True)
@@ -41,7 +44,7 @@ def process_data(municipality=None):
     month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     month_counts.index = month_counts.index.map(lambda x: month_names[x - 1] if x in range(1, 13) else '')
 
-    month_distribution_fig = px.line(x=month_counts.index, y=month_counts.values, color_discrete_sequence=['#1C5730'])
+    month_distribution_fig = px.bar(x=month_counts.index, y=month_counts.values, color_discrete_sequence=['#1C5730'])
     month_distribution_fig.update_layout(dragmode=False, font=font_style)
     month_distribution_fig.update_xaxes(title='Month', fixedrange=True)
     month_distribution_fig.update_yaxes(title='Cases', fixedrange=True)
@@ -55,12 +58,30 @@ def process_data(municipality=None):
     
     cases_per_municipality_data = data['Muncity'].value_counts().reset_index()
     cases_per_municipality_data.columns = ['Muncity', 'Cases']
-    cases_per_municipality_fig = px.bar(cases_per_municipality_data, y='Muncity', x='Cases', labels={'Muncity': 'Municipality', 'Cases': 'Cases'}, orientation='h', text='Cases', color_discrete_sequence=['#1C5730'])
-    cases_per_municipality_fig.update_traces(textposition='outside')
-    cases_per_municipality_fig.update_layout(showlegend=False, dragmode=False, font=font_style)
-    cases_per_municipality_fig.update_xaxes(fixedrange=True)
-    cases_per_municipality_fig.update_yaxes(fixedrange=True)
-    cases_per_municipality_html = cases_per_municipality_fig.to_html(full_html=False)
+    
+    cases_per_municipality_data = cases_per_municipality_data.sort_values(by='Muncity')
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        y=cases_per_municipality_data['Cases'],
+        x=cases_per_municipality_data['Muncity'],
+        marker_color='#1C5730',
+        name='Cases'
+    ))
+
+    fig.update_layout(
+        title='Total Distribution of Dengue Cases by Municipality (2019-2023)',  # Add title here
+        showlegend=False,
+        dragmode=False,
+        font=font_style,
+        xaxis_title='Municipality',
+        yaxis_title='Cases',
+        xaxis=dict(fixedrange=True),
+        yaxis=dict(fixedrange=True)
+    )
+
+    cases_per_municipality_html = fig.to_html(full_html=False)
     cases_per_municipality = cases_per_municipality_data.to_dict(orient='records')
 
     monthly_admission_data = data.groupby(['Muncity', 'AdmitYear', 'AdmitMonth']).size().reset_index(name='Cases')
@@ -70,21 +91,31 @@ def process_data(municipality=None):
 
     monthly_admission_pivot = monthly_admission_data.pivot_table(index=['Muncity', 'AdmitYear'], columns='MonthName', values='Cases', fill_value=0)
 
-    blood_type_counts = data.groupby(['Blood_Type', 'Sex']).size().reset_index(name='Cases')
-
-    blood_type_fig = px.bar(blood_type_counts, x='Blood_Type', y='Cases', color='Sex', barmode='group', 
-                            labels={'Cases': 'Cases', 'Blood_Type': 'Blood Type'}, 
-                            color_discrete_map={'F': '#81A263', 'M': '#1C5730'})
-    blood_type_fig.update_layout(dragmode=False, font=font_style)
-    blood_type_fig.update_xaxes(title='Blood Type', fixedrange=True)
-    blood_type_fig.update_yaxes(title='Cases', fixedrange=True)
-    blood_type_html = blood_type_fig.to_html(full_html=False)
-
+    # Plot for monthly distribution of dengue cases per municipality
+    monthly_admission_plots = {}
+    for year in data['AdmitYear'].unique():
+        yearly_data = monthly_admission_data[monthly_admission_data['AdmitYear'] == year]
+        fig = go.Figure()
+        for muncity in unique_municipalities:
+            muncity_data = yearly_data[yearly_data['Muncity'] == muncity]
+            fig.add_trace(go.Scatter(
+                x=muncity_data['MonthName'],
+                y=muncity_data['Cases'],
+                mode='lines+markers',
+                name=muncity
+            ))
+        fig.update_layout(
+            title=f'Monthly Dengue Cases Distribution for Each Municipality in {year}',
+            xaxis_title='Month',
+            yaxis_title='Cases',
+            xaxis=dict(type='category'),
+            yaxis=dict(title='Number of Cases')
+        )
+        monthly_admission_plots[year] = fig.to_html(full_html=False)
 
     return (month_distribution_html, 
             age_gender_html, 
             cases_per_municipality_html, 
             cases_per_municipality, 
             plots,
-            monthly_admission_pivot,
-            blood_type_html)
+            monthly_admission_plots)
