@@ -1,0 +1,89 @@
+.plot-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#plot-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.plotly .modebar-container svg:first-child {
+    display: none !important;
+}
+
+.barangay-plot {
+    width: 100%; /* Set the width to 100% of its container */
+    height: 750px; /* Increased height for better fit */
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-control-zoom {
+    display: none;
+}
+
+.map-container {
+    flex: 1;
+    min-width: 300px;
+    height: 400px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.plot-title-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.plot-section {
+    margin-bottom: 40px;
+    overflow: hidden;
+    clear: both;
+}
+
+.select-box {
+    width: 200px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.select-box::after {
+    content: '\25BC';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.select-box:hover {
+    border-color: #888;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.select-box:focus {
+    border-color: #1C5730;
+    box-shadow: #1C5730;
+}
+
+.select-box option[disabled] {
+    color: #aaa;
+}
