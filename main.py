@@ -4,8 +4,6 @@ import os
 import warnings
 import sklearn
 import pickle
-import plotly.graph_objects as go
-import plotly.io as pio
 import firebase_admin
 import requests
 import numpy as np
@@ -92,7 +90,6 @@ with open(model_path, 'rb') as file:
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     if request.method == 'POST':
-        # Process uploaded files
         files = {
             'file1': 'temperature',
             'file2': 'dengue',
@@ -115,7 +112,6 @@ def predict():
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     file.save(file_path)
                     
-                    # Upload to Firebase with folder
                     public_url = upload_to_firebase(file, filename, file_type)
                     print(f"File uploaded to Firebase Storage: {public_url}")
                     
@@ -130,18 +126,15 @@ def predict():
                         return redirect(url_for('predict'))
                     dfs[file_key] = df
 
-        # Check if all required files are uploaded
         if len(dfs) != len(files):
             flash('Please upload all required files.', 'error')
             return redirect(url_for('predict'))
 
-        # Data processing and merging
         dengue_df = dfs['file2']
         temperature_df = dfs['file1']
         humidity_df = dfs['file3']
         mosquito_df = dfs['file4']
         
-        # Convert date columns to datetime with the correct format
         dengue_df['DateOfEntry'] = pd.to_datetime(dengue_df['DateOfEntry'], format='%d/%m/%Y')
         temperature_df['Date'] = pd.to_datetime(temperature_df['Date'], format='%d/%m/%Y')
         mosquito_df['Trap Date'] = pd.to_datetime(mosquito_df['Trap Date'], format='%d/%m/%Y')
@@ -198,7 +191,6 @@ def predict():
         merged_df = merged_df.merge(mosquito_daily, on='DateMonthYear', how='left')
         merged_df['MonthYear'] = merged_df['DateMonthYear'].dt.to_period('M').dt.to_timestamp()
         
-        # Define categorical columns
         categorical_cols = ['Muncity', 'Sex', 'Blood_Type', 'Place_Acquired', 'Barangay',
                             'ClinClass', 'CaseClassification', 'Type', 'LabRes']
         
@@ -206,15 +198,12 @@ def predict():
             'Genus', 'Gender', 'Specific Epithet', 'Count'
         ]
 
-        # Forward fill for specified columns
-        merged_df_ffill = merged_df.copy()  # Make a copy to avoid modifying the original DataFrame
+        merged_df_ffill = merged_df.copy()  
         merged_df_ffill[fb_fill] = merged_df_ffill[fb_fill].ffill()
 
-        # Backward fill for specified columns
-        merged_df_fill = merged_df_ffill.copy()  # Make a copy to avoid modifying the forward-filled DataFrame
+        merged_df_fill = merged_df_ffill.copy()  
         merged_df_fill[fb_fill] = merged_df_fill[fb_fill].bfill()
 
-        # List of columns to fill with 0
         zero_fill = [
             'Cases', 'Muncity', 'AdmitToEntry', 'OnsetToAdmit', 'LabRes',
             'MorbidityMonth', 'MorbidityWeek', 'Age', 'Sex', 'Blood_Type',
@@ -222,61 +211,50 @@ def predict():
             'Type', 'ClinClass', 'CaseClassification', 'Outcome'
         ]
 
-        # Fill NaN values with 0 for the specified columns
         merged_df_fill[zero_fill] = merged_df_fill[zero_fill].fillna(0)
         
         print(merged_df_fill.dtypes)
         
-                # Convert categorical columns to string type to avoid mixed types
         for col in categorical_cols:
             merged_df_fill[col] = merged_df_fill[col].astype(str)
     
-        # Define your features and categorical columns
         features = ['Count', 'Muncity', 'Sex', 'Age', 'Blood_Type', 
                     'Place_Acquired', 'Barangay', 'ClinClass', 'CaseClassification',
                     'Type', 'LabRes', 'MorbidityMonth', 'Admitted', 'MorbidityWeek']
 
-        # Prepare X_new with only the selected features
         X_new = merged_df_fill[features]
 
-        # Create LabelEncoder instances
         label_encoders = {col: LabelEncoder() for col in categorical_cols}
 
-        # Apply LabelEncoder to each categorical column
         for col in categorical_cols:
             X_new[col] = label_encoders[col].fit_transform(X_new[col])
 
-        # Ensure X_new has exactly 14 features
         if X_new.shape[1] != 14:
             raise ValueError(f"Expected 14 features, but got {X_new.shape[1]}")
 
-        # Predict the dengue cases for the next year
         merged_df_fill['Predicted_Cases'] = model.predict(X_new)
 
-        # Shift the dates to predict for the next year
-        merged_df_fill['DateMonthYear'] = merged_df_fill['DateMonthYear'] + pd.DateOffset(years=1)
+        merged_df_fill['MonthYear'] = merged_df_fill['MonthYear'] + pd.DateOffset(years=1)
 
-        # Filter only for the next year
-        next_year = merged_df_fill['DateMonthYear'].dt.year.max()
-        predictions_next_year = merged_df_fill[merged_df_fill['DateMonthYear'].dt.year == next_year]
+        next_year = merged_df_fill['MonthYear'].dt.year.max()
+        predictions_next_year = merged_df_fill[merged_df_fill['MonthYear'].dt.year == next_year]
 
-        # Aggregate predictions by municipality and month
-        municipality_monthly_predictions = predictions_next_year.groupby(['DateMonthYear', 'Muncity']).agg({
+        municipality_monthly_predictions = predictions_next_year.groupby(['MonthYear', 'Muncity']).agg({
             'Predicted_Cases': 'sum'
         }).reset_index()
 
-        # Ensure all municipalities are included
         all_municipalities = dengue_df['Muncity'].unique()
         all_municipalities_df = pd.DataFrame({'Muncity': all_municipalities})
         municipality_monthly_predictions = municipality_monthly_predictions.merge(all_municipalities_df, on='Muncity', how='right')
         municipality_monthly_predictions['Predicted_Cases'] = municipality_monthly_predictions['Predicted_Cases'].fillna(0).astype(int)  # Convert to integer
 
-        # Convert predictions to a list of dictionaries for easy rendering
+        municipality_monthly_predictions['MonthYear'] = municipality_monthly_predictions['MonthYear'].dt.strftime('%B %Y')
+
         predictions = municipality_monthly_predictions.to_dict(orient='records')
 
         return render_template('predict.html', predictions=predictions)
     
-    return render_template('predict.html')
+    return render_template('predict.html')	
 
 
 @app.route('/contact_numbers', methods=['GET'])
@@ -316,41 +294,6 @@ def update_contact_numbers():
         print('Error updating contact numbers:', e)  # Debugging output
         return jsonify({'success': False}), 500
 
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        fullname = request.form['fullname']
-        municipality = request.form['municipality']
-        contact_number = request.form['contact_number']
-        email = request.form['email']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-
-        if password != confirm_password:
-            flash('Passwords do not match')
-            return redirect(url_for('register'))
-
-        # Hash the password before storing it
-        hashed_password = generate_password_hash(password)
-
-        try:
-            db.collection('user_acc').add({
-                'fullname': fullname,
-                'municipality': municipality,
-                'contact_number': contact_number,
-                'email': email,
-                'password': hashed_password,
-                'status': 'pending'
-            })
-            flash('Account registered successfully! Please wait for admin approval.')
-            return redirect(url_for('login'))
-        except Exception as e:
-            print(f"Error: {e}")
-            flash('Database operation failed. Please try again later.')
-            return redirect(url_for('register'))
-
-    return render_template('registration.html')
 
 @app.after_request
 def after_request(response):
@@ -406,40 +349,6 @@ def logout():
     session.pop('admin', None)
     return redirect(url_for('login'))
 
-
-
-@app.route('/user')
-def user_page():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-
-    selected_municipality = request.args.get('municipality')
-
-    municipalities = ['Famy', 'Kalayaan', 'Mabitac', 'Paete', 'Pakil', 'Pangil', 'Santa Maria', 'Siniloan']
-    user_plots = {}
-    user_yearly_plots = {}
-
-    # Process data for each municipality
-    for municipality in municipalities:
-        (_, _, _, _, municipality_plots, municipality_yearly_plots, _) = process_data(municipality)
-        user_plots[municipality] = municipality_plots.get(municipality, "")
-        user_yearly_plots.update(municipality_yearly_plots)
-
-    # Process data for the selected municipality
-    (month_distribution_html, age_gender_html, cases_per_municipality_html,
-     cases_per_municipality_data, _, monthly_admission_pivot,
-     blood_type_html) = process_data(selected_municipality)
-
-    return render_template('user.html',
-                           month_distribution_html=month_distribution_html,
-                           age_gender_html=age_gender_html,
-                           cases_per_municipality_html=cases_per_municipality_html,
-                           plots=user_plots,
-                           selected_municipality=selected_municipality,
-                           cases_per_municipality_data=cases_per_municipality_data,
-                           monthly_admission_pivot=monthly_admission_pivot,
-                           blood_type_html=blood_type_html)
-
 @app.route('/admin')
 def admin_page():
     if 'admin' not in session:
@@ -453,14 +362,13 @@ def admin_page():
 
     # Process data for each municipality
     for municipality in municipalities:
-        (_, _, _, _, municipality_plots, municipality_yearly_plots, _) = process_data(municipality)
+        (_, _, _, _, municipality_plots, municipality_yearly_plots) = process_data(municipality)
         admin_plots[municipality] = municipality_plots.get(municipality, "")
         admin_yearly_plots.update(municipality_yearly_plots)
 
     # Process data for the selected municipality
     (month_distribution_html, age_gender_html, cases_per_municipality_html,
-     cases_per_municipality_data, _, monthly_admission_plots,
-     blood_type_html) = process_data(selected_municipality)
+     cases_per_municipality_data, _, monthly_admission_plots) = process_data(selected_municipality)
 
     return render_template('admin.html',
                            month_distribution_html=month_distribution_html,
@@ -469,29 +377,7 @@ def admin_page():
                            plots=admin_plots,
                            selected_municipality=selected_municipality,
                            cases_per_municipality_data=cases_per_municipality_data,
-                           monthly_admission_plots=monthly_admission_plots,
-                           blood_type_html=blood_type_html)
-    
-@app.route('/get_monthly_admission_plots')
-def get_monthly_admission_plots():
-    year = request.args.get('year')
-    if year:
-        try:
-            # Call process_data to get the plots
-            _, _, _, _, _, monthly_admission_plots, _ = process_data()
-
-            # Return the specific plot for the requested year
-            plot_html = monthly_admission_plots.get(int(year))
-            
-            if plot_html:
-                return jsonify({'plot_html': plot_html})
-            else:
-                return jsonify({'error': 'No data available for the selected year.'})
-        except Exception as e:
-            print(f"Error generating plot: {e}")
-            return jsonify({'error': 'Error generating plot.'})
-    return jsonify({'error': 'Year not specified'})
-
+                           monthly_admission_plots=monthly_admission_plots)
 
 @app.route('/update_plot')
 def update_plot():
@@ -506,91 +392,23 @@ def update_plot():
     else:
         return jsonify({'error': 'No municipality selected'})
     
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    users_ref = db.collection('user_acc')
-    docs = users_ref.stream()
-
-    users = []
-    for doc in docs:
-        user = doc.to_dict()
-        user['id'] = doc.id  # Include document ID if needed
-        users.append(user)
-
-    return jsonify(users)
-            
-@app.route('/api/approve_user', methods=['POST'])
-def approve_user():
-    data = request.json
-    email = data.get('email')
-    fullname = data.get('fullname')
-    password = data.get('password')
-
-    if not email:
-        return jsonify({'error': 'No email provided'}), 400
-
-    try:
-        # Update status in user_acc collection
-        user_ref = db.collection('user_acc').where('email', '==', email).limit(1).get()
-        
-        if not user_ref:
-            return jsonify({'error': 'User not found'}), 404
-        
-        user_doc = user_ref[0].reference
-        user_doc.update({'status': 'approved'})
-        
-        return jsonify({'status': 'success'})
-    except Exception as e:
-        print(f"Error in approve_user route: {e}")
-        return jsonify({'error': f'Database operation failed: {str(e)}'}), 500
-
-
-@app.route('/api/reject_user', methods=['POST'])
-def reject_user():
-    try:
-        data = request.json
-        email = data.get('email')
-
-        if not email:
-            return jsonify({'status': 'error', 'error': 'No email provided'}), 400
-
-        # Reference to the Firestore collection
-        users_ref = db.collection('user_acc')
-        query = users_ref.where('email', '==', email).limit(1).get()
-
-        if query:
-            doc_id = query[0].id
-            user_ref = users_ref.document(doc_id)
-            user_ref.update({'status': 'rejected'})
-            return jsonify({'status': 'success'}), 200
-        else:
-            return jsonify({'status': 'error', 'error': 'No user found with that email'}), 404
-
-    except Exception as e:
-        return jsonify({'status': 'error', 'error': str(e)}), 500
-
-@app.route('/approve_accounts')
-def approve_accounts():
-    return render_template('approve_accounts.html')
-
 @app.route('/repository', methods=['GET'])
 def repository():
-    # List of files in Firebase Storage
     blobs = bucket.list_blobs()
     
-    # Collect folder and file details
     folders = {}
+    expiration = datetime.utcnow() + timedelta(minutes=10)  
+    
     for blob in blobs:
-        folder_name = blob.name.split('/')[0]  # Assuming folder structure
+        folder_name = blob.name.split('/')[0]  
         file_info = {
             'name': blob.name,
-            'url': blob.public_url
+            'url': blob.generate_signed_url(expiration=expiration)  
         }
         if folder_name not in folders:
             folders[folder_name] = []
         folders[folder_name].append(file_info)
     
-    # Convert to list of folders with files
     folder_list = [{'name': name, 'files': files} for name, files in folders.items()]
     
     return render_template('repository.html', folders=folder_list)
@@ -601,34 +419,154 @@ def registration():
 
 @app.route('/feedbacks')
 def feedbacks():
-    return render_template('feedbacks.html')
+    try:
+        feedback_ref = db.collection('feedbacks')
+        feedbacks = feedback_ref.stream()
 
+        feedback_list = []
+        for feedback in feedbacks:
+            data = feedback.to_dict()
+            feedback_list.append({
+                'id': feedback.id, 
+                'Date and Time': data.get('Date and Time'),
+                'Fullname': data.get('Fullname'),
+                'Email': data.get('Email'),
+                'Feedback': data.get('Feedback'),
+                'Action': data.get('Action')
+            })
+        
+        total_feedbacks = len(feedback_list)
+
+        return render_template('feedbacks.html', feedbacks=feedback_list, total_feedbacks=total_feedbacks)
+    except Exception as e:
+        print(f"Error fetching feedbacks: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/submit_feedback', methods=['POST'])
+def submit_feedback():
+    fullname = request.form.get('fullname')
+    email = request.form.get('email')
+    feedback = request.form.get('feedback')
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    print('Received data:', {
+        'fullname': fullname,
+        'email': email,
+        'feedback': feedback,
+        'timestamp': timestamp
+    })
+
+    try:
+        feedback_ref = db.collection('feedbacks')
+        feedback_ref.add({
+            'Fullname': fullname,
+            'Email': email,
+            'Feedback': feedback,
+            'Date and Time': timestamp,
+            'Action': 'None'
+        })
+
+        return jsonify({"message": "Feedback submitted successfully!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/update_action', methods=['POST'])
+def update_action():
+    data = request.get_json()
+    feedback_id = data.get('id') 
+    new_action = data.get('action')
+
+    try:
+        feedback_ref = db.collection('feedbacks').document(feedback_id)
+        feedback_ref.update({
+            'Action': new_action
+        })
+        return jsonify({"message": "Action updated successfully!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.route('/messages')
 def messages():
-    return render_template('messages.html')
+    try:
+        message_ref = db.collection('messages')
+        messages = message_ref.stream()
+
+        message_list = []
+        for message in messages:
+            data = message.to_dict()
+            message_list.append({
+                'id': message.id, 
+                'date_and_time': data.get('Date and Time'),
+                'fullname': data.get('Fullname'),
+                'email': data.get('Email'),
+                'contact_number': data.get('Contact Number'),
+                'message': data.get('Message'),
+                'action': data.get('Action')
+            })
+        
+        total_messages = len(message_list)
+
+        return render_template('messages.html', messages=message_list, total_messages=total_messages)
+    except Exception as e:
+        print(f"Error fetching messages: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/submit_message', methods=['POST'])
+def submit_message():
+    fullname = request.form.get('fullname')
+    contactnumber = request.form.get('contactnumber')
+    email = request.form.get('email')
+    message = request.form.get('message')
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    try:
+        message_ref = db.collection('messages')
+        message_ref.add({
+            'Fullname': fullname,
+            'Contact Number': contactnumber,
+            'Email': email,
+            'Message': message,
+            'Date and Time': timestamp,
+            'Action': 'None'
+        })
+
+        return jsonify({"message": "Message submitted successfully!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/message_update_action', methods=['POST'])
+def message_update_action():
+    data = request.get_json()
+    message_id = data.get('id') 
+    new_action = data.get('action')
+
+    try:
+        message_ref = db.collection('messages').document(message_id)
+        message_ref.update({
+            'Action': new_action
+        })
+        return jsonify({"message": "Action updated successfully!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/forgotpass', methods=['GET', 'POST'])
 def forgotpass():
     if request.method == 'POST':
         email = request.form.get('email').strip().lower()
-        print(f'Attempting to find email: {email}')  # Debug log
+        print(f'Attempting to find email: {email}')  
 
         try:
-            # Query to find documents where the email field matches
             users = db.collection('user_acc').where('email', '==', email).get()
 
-            # Check if the query returned any documents
             if len(users) == 0:
                 return render_template('forgotpass.html', error='Email not found.')
 
-            # Generate a password reset link
             try:
                 reset_link = auth.generate_password_reset_link(email)
             except Exception as e:
                 print(f'Error generating password reset link: {e}')
                 return render_template('forgotpass.html', error='Failed to generate password reset link.')
 
-            # Send email
             try:
                 msg = Message('Password Reset Request',
                               sender='your-gmail-address@gmail.com',
@@ -657,7 +595,6 @@ def resetpass():
             return render_template('resetpass.html', error='Passwords do not match.')
 
         try:
-            # Confirm the password reset code and update the password
             auth.confirm_password_reset(oob_code, new_password)
             return render_template('resetpass.html', success='Your password has been successfully reset.')
         except Exception as e:
@@ -679,16 +616,13 @@ def home():
     user_plots = {}
     user_yearly_plots = {}
 
-    # Process data for each municipality
     for municipality in municipalities:
-        (_, _, _, _, municipality_plots, municipality_yearly_plots, _) = process_data(municipality)
+        (_, _, _, _, municipality_plots, municipality_yearly_plots) = process_data(municipality)
         user_plots[municipality] = municipality_plots.get(municipality, "")
         user_yearly_plots.update(municipality_yearly_plots)
 
-    # Process data for the selected municipality
     (month_distribution_html, age_gender_html, cases_per_municipality_html,
-     cases_per_municipality_data, _, monthly_admission_pivot,
-     blood_type_html) = process_data(selected_municipality)
+     cases_per_municipality_data, _, monthly_admission_pivot) = process_data(selected_municipality)
 
     return render_template('home.html', error=error,
                            month_distribution_html=month_distribution_html,
@@ -697,8 +631,7 @@ def home():
                            plots=user_plots,
                            selected_municipality=selected_municipality,
                            cases_per_municipality_data=cases_per_municipality_data,
-                           monthly_admission_pivot=monthly_admission_pivot,
-                           blood_type_html=blood_type_html)
+                           monthly_admission_pivot=monthly_admission_pivot)
     
 @app.route('/send-alerts', methods=['POST'])
 def send_alerts():
@@ -706,10 +639,9 @@ def send_alerts():
     try:
         for municipality, contact_number in data.items():
             message = f"Alert: Dengue prediction results are available for {municipality}."
-            # Send SMS
             client.messages.create(
                 body=message,
-                from_=twilio_phone_number,  # Your Twilio phone number
+                from_=twilio_phone_number,  
                 to=contact_number
             )
         
