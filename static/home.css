@@ -269,7 +269,6 @@ form button:hover {
 
 /* Add underline after each section */
 .container section {
-    border-bottom: 1px solid #1C5730;
     padding-bottom: 20px; /* Adjust padding as needed */
     margin-bottom: 20px; /* Adjust margin as needed */
 }
@@ -460,7 +459,7 @@ form button:hover {
     background-image: url(../static/img/bg.jpg); /* Ensure the URL is correct */
     background-size: cover;
     background-position: center;
-    opacity: 0.7; /* Adjust opacity as needed (0 = fully transparent, 1 = fully opaque) */
+    opacity: 0.6; /* Adjust opacity as needed (0 = fully transparent, 1 = fully opaque) */
     z-index: -1; /* Place the background behind the text */
 }
 
