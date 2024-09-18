@@ -21,7 +21,6 @@
             </div>
             <div class="links">
                 <a href="/admin" class="pho-link {% if request.path == '/admin' %}current{% endif %}">Summary Report</a>
-                <a href="/approve_accounts" class="pho-link {% if request.path == '/approve_accounts' %}current{% endif %}">Accounts</a>
                 <a href="/repository" class="pho-link {% if request.path == '/repository' %}current{% endif %}">Repository</a>
                 <a href="{{ url_for('predict') }}" class="pho-link {% if request.path == url_for('predict') %}current{% endif %}">Predict</a>
                 <a href="/feedbacks" class="pho-link {% if request.path == '/feedbacks' %}current{% endif %}">Feedbacks</a>
