@@ -4,149 +4,24 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: #edecec;
-    overflow-y: auto;
-
+    background-color: #ffffff;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-y: auto; /* Enable vertical scrolling if needed */
+    overflow-x: hidden; /* Disable horizontal scrolling */
 }
 
 .main-content {
     margin-top: 70px; /* Adjust this to match the header height */
 }
 
-.plot-container {
-    width: 100%;
+/* Add underline after each section */
+.main-content section {
     max-width: 1200px;
     margin: 0 auto;
 }
 
-#plot-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+.main-content section ul {
+    list-style-type: disc; /* Use bullets for unordered lists */
 }
 
-.plotly .modebar-container svg:first-child {
-    display: none !important;
-}
-
-.barangay-plot {
-    width: 100%; /* Set the width to 100% of its container */
-    height: 750px; /* Increased height for better fit */
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.leaflet-control-zoom {
-    display: none;
-}
-
-.side-by-side-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-.map-container {
-    flex: 1;
-    min-width: 300px;
-    height: 400px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.plot-title-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.plot-section {
-    margin-bottom: 40px;
-    overflow: hidden;
-    clear: both;
-}
-
-#municipality-select {
-    width: 200px;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-#municipality-select::after {
-    content: '\25BC';
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-/* Style on hover */
-#municipality-select:hover {
-    border-color: #888;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Style on focus */
-#municipality-select:focus {
-    border-color: #0056b3;
-    box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
-}
-
-/* Style for the disabled option */
-#municipality-select option[disabled] {
-    color: #aaa;
-}
-
-.municipality-plot-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-.municipality-plot {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: center;
-}
-
-.municipality-plot h3 {
-    margin-top: 10px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-@media (max-width: 740px) {
-    .map-container, .plot-title-container {
-        flex-basis: 100%;
-        min-width: unset;
-    }
-
-    .container-header {
-        padding: 10px;
-    }
-
-    .logo-text {
-        align-items: center;
-        text-align: center;
-    }
-
-    .pho-logo {
-        margin-bottom: 10px;
-    }
-}
