@@ -59,14 +59,11 @@
     </div>
 
     <main>
-
-        
         <div id="statistics" class="container">
             <section>
                 <div class="plot-container">
                     <div class="plot-section">
-                        <h2>Total Distribution of Dengue Cases by Municipality</h2>
-                        <div class="side-by-side-container">
+                        <h2>Dengue Cases by Municipality Heat Map</h2>
                             <div id="mapid" class="map-container"></div>
                             <div id="municipality-plot" class="municipality-plot">
                                 {{ cases_per_municipality_html | safe }}
@@ -76,7 +73,7 @@
                     
                     <div class="plot-section">
                         <h2>Distribution of Dengue Cases by Barangay</h2>
-                        <select id="municipality-select" onchange="updatePlot()">
+                        <select id="municipality-select" onchange="updatePlot()" class="select-box">
                             <option value="" selected disabled>Select Municipality</option>
                             <option value="Famy">Famy</option>
                             <option value="Kalayaan">Kalayaan</option>
@@ -103,18 +100,10 @@
                         </div>
                     </div>
             
-            
                     <div class="plot-section">
                         <h2>Total Distribution of Dengue Cases by Age and Gender</h2>
                         <div class="age-gender-plot">
                             {{ age_gender_html | safe }}
-                        </div>
-                    </div>
-            
-                    <div class="plot-section">
-                        <h2>Total Distribution of Dengue Cases by Blood Type</h2>
-                        <div class="blood-type-plot">
-                            {{ blood_type_html | safe }}
                         </div>
                     </div>
                 </div>
@@ -123,7 +112,6 @@
 
         <div id="dengue-info" class="container">
             <section>
-                <h2>About Dengue</h2>
                 <div class="info">
                     <h3>Overview</h3>
                     <p>
@@ -147,7 +135,7 @@
                     <p>
                         Individuals who are infected for the second time are at greater risk of severe dengue.
                     </p>
-                    <h4>Severe Dengue Symptoms</h4>
+                    <h3>Severe Dengue Symptoms</h3>
                     <p>Severe dengue symptoms often come after the fever has gone away and may include:</p>
                     <ul>
                         <li>Severe abdominal pain</li>
@@ -177,22 +165,22 @@
                     </p>
         
                     <h3>Transmission</h3>
-                    <h4>Through Mosquito Bite</h4>
+                    <h5>Through Mosquito Bite</h5>
                     <p>
                         The dengue virus is transmitted to humans through the bites of infected female mosquitoes, primarily the Aedes aegypti mosquito. Other species within the Aedes genus can also act as vectors, but their contribution is normally secondary to Aedes aegypti. Once infectious, the mosquito can transmit the virus for the rest of its life.
                     </p>
         
-                    <h4>Human-to-Mosquito Transmission</h4>
+                    <h5>Human-to-Mosquito Transmission</h5>
                     <p>
                         Mosquitoes can become infected by people who are viremic with the dengue virus. Human-to-mosquito transmission can occur up to 2 days before someone shows symptoms of the illness, and up to 2 days after the fever has resolved.
                     </p>
         
-                    <h4>Maternal Transmission</h4>
+                    <h5>Maternal Transmission</h5>
                     <p>
                         The primary mode of transmission of the dengue virus between humans involves mosquito vectors. There is evidence of the possibility of maternal transmission (from a pregnant mother to her baby).
                     </p>
         
-                    <h4>Other Transmission Modes</h4>
+                    <h5>Other Transmission Modes</h5>
                     <p>
                         Rare cases of transmission via blood products, organ donation, and transfusions have been recorded. Similarly, transovarial transmission of the virus within mosquitoes has also been recorded.
                     </p>
@@ -511,19 +499,21 @@
 
             circleMarker.bindPopup("<b>" + municipality + "</b><br>Cases: " + cases);
 
-            // Add event listeners for highlighting and popup behavior
-            circleMarker.on('mouseover', function() {
-                circleMarker.openPopup();
-                highlightMunicipality(municipality);
-            });
+             // Make sure to add event listeners only once
+            if (!circleMarker.hasEventListeners('mouseover')) {
+                circleMarker.on('mouseover', function() {
+                    circleMarker.openPopup();
+                    highlightMunicipality(municipality);
+                });
+            }
 
-            circleMarker.on('mouseout', function() {
-                circleMarker.closePopup();
-                removeHighlight();
-            });
+            if (!circleMarker.hasEventListeners('mouseout')) {
+                circleMarker.on('mouseout', function() {
+                    circleMarker.closePopup();
+                    removeHighlight();
+                });
+            }
         }
-
-
 
         function highlightMunicipality(municipality) {
             console.log("Highlighting municipality:", municipality);
@@ -536,7 +526,7 @@
 
             fetch('{{ url_for("static", filename="maps_data.geojson") }}')
                 .then(response => {
-                    console.log("GeoJSON fetched:", response);
+                    console.log("GeoJSON festched:", response);
                     return response.json();
                 })
                 .then(data => {
