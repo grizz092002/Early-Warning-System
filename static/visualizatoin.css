@@ -6,7 +6,7 @@
 
 .total-cases-container {
     flex: 1;
-    margin:130px 20px;
+    margin: 130px 20px;
     padding: 20px; 
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -28,7 +28,7 @@
     margin: 0;
 }
 
-.total-cases-container p{
+.total-cases-container p {
     font-size: 2.5rem;
 }
 
@@ -45,7 +45,6 @@
 
 .plot-section {
     overflow: hidden;
-    clear: both;
     width: 100%;
     max-width: 1200px;
     margin: 20px auto;
@@ -71,8 +70,6 @@
 }
 
 .map-container {
-    flex: 1;
-    min-width: 500px;
     height: 500px;
     padding: 20px;
     border: 1px solid #ddd;
@@ -122,4 +119,80 @@
 
 .select-box option[disabled] {
     color: #aaa;
+}
+
+.screen-too-small{
+    display: none;
+}
+
+/* Responsive Styles */
+@media (max-width: 426px) {
+    
+    .plot-section{
+        display: flow-root;
+        margin: 0;
+        padding: 0;
+    }
+
+    .total-cases-container {
+        flex: 1;
+        margin: 10px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .total-cases-year-container {
+        display: block;
+    }
+
+    .year-distribution-plot,
+    .municipality-plot,
+    .plot-container,
+    #monthly-trend-plot,
+   .gender-bar-plot{
+        margin: 0;
+        padding: 0;
+    }
+
+    .map-container {
+        height: 500px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .plot-container{
+        padding: 0;
+    }
+
+    .select-box,
+    .barangay-plots{
+        display: none;
+    }
+
+    .screen-too-small{
+        display: block;
+        font-size: medium;
+        color: red;
+    }
+}
+
+@media (max-width: 768px) {
+
+}
+
+@media (max-width: 1024px) {
+
+}
+
+@media (max-width: 1440px) {
+
 }
