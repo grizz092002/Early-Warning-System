@@ -22,7 +22,6 @@
                     <h4>(2019-2023)</h4>
                     <p>{{ total_cases }}</p> <!-- Add this line to display the total cases -->
                 </div>
-                
                 <div id="year-distribution-plot" class="year-distribution-plot">
                     {{ yearly_distribution_html | safe }}
                 </div>
@@ -35,7 +34,7 @@
             </div>
         </div>
 
-        <div class="plot-section"></div>
+        <div class="plot-section">
             <div id="municipality-plot" class="municipality-plot">
                 {{ cases_per_municipality_html | safe }}
             </div>
@@ -54,12 +53,15 @@
                 <option value="Santa Maria">Santa Maria</option>
                 <option value="Siniloan">Siniloan</option>
             </select>
-            <div id="barangay-plots">
+            <div id="barangay-plots" class="barangay-plots">
                 {% for municipality, plot_html in plots.items() %}
                     <div id="{{ municipality }}" class="barangay-plot" style="display: none;">
                         {{ plot_html | safe }}
                     </div>
                 {% endfor %}
+            </div>
+            <div class="screen-too-small">
+                Plot cannot be displayed, screen is too small.
             </div>
         </div>
         
@@ -69,7 +71,7 @@
             </div>
         </div>
 
-        <div class="plot-section"></div>
+        <div class="plot-section">
             <div id="monthly-trend-plot">
                 {{ monthly_trend_html | safe }}
             </div>
@@ -81,7 +83,7 @@
             </div>
         </div>
 
-        <div class="plot-section"></div>
+        <div class="plot-section">
             <div class="gender-bar-plot">
                 {{ gender_bar_html | safe }}
             </div>
